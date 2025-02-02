@@ -14,18 +14,16 @@ go install github.com/air-verse/air@latest
 
 ```
 
-### 生成开发模式的自签名
+### 热更新的方式启动 web
 
 ```bash
-openssl req -x509 -newkey rsa:4096 -keyout ./frontend/api/resources/dev.key.pem -out ./frontend/api/resources/dev.cert.pem -days 365 -nodes
-
-openssl req -x509 -newkey rsa:4096 -keyout ./frontend/web/resources/dev.key.pem -out ./frontend/web/resources/dev.cert.pem -days 365 -nodes
+air -d -c .air/frontend/web.toml
 ```
 
 ### 热更新的方式启动 api
 
 ```bash
-air -d -c .air/api
+air -d -c .air/frontend/api.toml
 ```
 
 # 文档

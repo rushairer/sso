@@ -21,15 +21,8 @@ func main() {
 	bootstrap.SetupServer(server)
 
 	log.Println("running...")
-	if gin.IsDebugging() {
-		err := server.RunTLS(":443", "./frontend/web/resources/dev.cert.pem", "./frontend/web/resources/dev.key.pem")
-		if err != nil {
-			log.Println(err)
-		}
-	} else {
-		err := server.Run(fmt.Sprintf(":%s", config.ServerPort))
-		if err != nil {
-			log.Println(err)
-		}
+	err := server.Run(fmt.Sprintf(":%s", config.WebServerPort))
+	if err != nil {
+		log.Println(err)
 	}
 }
