@@ -11,3 +11,8 @@ var MigrationsPath = utils.GetEnv(
 	"MIGRATIONS_PATH",
 	"file://./migrations",
 )
+
+var RedisDSN string = utils.GetEnv(
+	"REDIS_DSN",
+	"127.0.0.1:6379",
+)

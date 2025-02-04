@@ -3,22 +3,24 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
+	"net/url"
 
 	accountsRepositories "github.com/rushairer/sso/modules/accounts/repositories"
 	applicationsRepositories "github.com/rushairer/sso/modules/applications/repositories"
 	"github.com/rushairer/sso/modules/auth/services"
+	"github.com/rushairer/sso/utils/errors"
 )
 
 type AuthHandler struct {
 	authService     *services.AuthService
-	accountRepo     *accountsRepositories.AccountRepository
-	applicationRepo *applicationsRepositories.ApplicationRepository
+	accountRepo     accountsRepositories.AccountRepository
+	applicationRepo applicationsRepositories.ApplicationRepository
 }
 
 func NewAuthHandler(
 	authService *services.AuthService,
-	accountRepo *accountsRepositories.AccountRepository,
-	applicationRepo *applicationsRepositories.ApplicationRepository,
+	accountRepo accountsRepositories.AccountRepository,
+	applicationRepo applicationsRepositories.ApplicationRepository,
 ) *AuthHandler {
 	return &AuthHandler{
 		authService:     authService,
@@ -39,92 +41,89 @@ type TokenResponse struct {
 	ExpiresIn   int    `json:"expires_in"`
 }
 
-func (h *AuthHandler) HandleAuthorize(w http.ResponseWriter, r *http.Request) {
-	clientID := r.URL.Query().Get("client_id")
-	redirectURI := r.URL.Query().Get("redirect_uri")
-	responseType := r.URL.Query().Get("response_type")
-
-	if responseType != "code" {
-		http.Error(w, "unsupported_response_type", http.StatusBadRequest)
-		return
-	}
-
-	app, err := h.applicationRepo.GetByClientID(r.Context(), clientID)
-	if err != nil || app == nil {
-		http.Error(w, "invalid_client", http.StatusBadRequest)
-		return
-	}
-
-	if !app.ValidateRedirectURI(redirectURI) {
-		http.Error(w, "invalid_redirect_uri", http.StatusBadRequest)
-		return
-	}
-
-	// TODO: 实现登录页面渲染
-	// 这里应该渲染登录页面，让用户输入凭证
-}
-
 func (h *AuthHandler) HandleLogin(w http.ResponseWriter, r *http.Request) {
-	var req LoginRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "invalid_request", http.StatusBadRequest)
+	var loginReq LoginRequest
+	if err := json.NewDecoder(r.Body).Decode(&loginReq); err != nil {
+		errors.HTTPError(w, errors.NewBadRequestError("Invalid request body", err))
 		return
 	}
 
-	userID, err := h.authService.ValidateCredentials(r.Context(), req.Username, req.Password)
+	// 验证用户凭据
+	userID, err := h.authService.ValidateCredentials(r.Context(), loginReq.Username, loginReq.Password)
 	if err != nil {
-		http.Error(w, "invalid_grant", http.StatusUnauthorized)
+		errors.HTTPError(w, errors.NewAuthorizationError("Invalid credentials", err))
 		return
 	}
 
+	// 创建会话
 	sessionID, err := h.authService.CreateSession(r.Context(), userID)
 	if err != nil {
-		http.Error(w, "server_error", http.StatusInternalServerError)
+		errors.HTTPError(w, errors.NewInternalError("Failed to create session", err))
 		return
 	}
 
-	// 设置会话Cookie
-	http.SetCookie(w, &http.Cookie{
-		Name:     "session_id",
-		Value:    sessionID,
-		Path:     "/",
-		HttpOnly: true,
-		Secure:   true,
-		SameSite: http.SameSiteLaxMode,
-	})
+	// 生成授权码
+	clientID := r.URL.Query().Get("client_id")
+	code, err := h.authService.GenerateAuthorizationCode(r.Context(), sessionID, clientID)
+	if err != nil {
+		errors.HTTPError(w, errors.NewInternalError("Failed to generate authorization code", err))
+		return
+	}
 
-	// 重定向回授权页面
-	http.Redirect(w, r, "/authorize"+r.URL.RawQuery, http.StatusFound)
+	// 返回授权码
+	redirectURI := r.URL.Query().Get("redirect_uri")
+	redirectURL, err := url.Parse(redirectURI)
+	if err != nil {
+		errors.HTTPError(w, errors.NewBadRequestError("Invalid redirect URI", err))
+		return
+	}
+
+	q := redirectURL.Query()
+	q.Set("code", code)
+	redirectURL.RawQuery = q.Encode()
+
+	http.Redirect(w, r, redirectURL.String(), http.StatusFound)
 }
 
 func (h *AuthHandler) HandleToken(w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseForm(); err != nil {
-		http.Error(w, "invalid_request", http.StatusBadRequest)
+		errors.HTTPError(w, errors.NewBadRequestError("Invalid request", err))
 		return
 	}
 
 	grantType := r.Form.Get("grant_type")
 	if grantType != "authorization_code" {
-		http.Error(w, "unsupported_grant_type", http.StatusBadRequest)
+		errors.HTTPError(w, errors.NewBadRequestError("Unsupported grant type", nil))
 		return
 	}
 
 	code := r.Form.Get("code")
 	clientID := r.Form.Get("client_id")
-	clientSecret := r.Form.Get("client_secret")
-
-	if !h.applicationRepo.ValidateClientCredentials(r.Context(), clientID, clientSecret) {
-		http.Error(w, "invalid_client", http.StatusUnauthorized)
+	if code == "" || clientID == "" {
+		errors.HTTPError(w, errors.NewBadRequestError("Missing required parameters", nil))
 		return
 	}
 
+	// 验证客户端应用
+	app, err := h.applicationRepo.GetByClientID(r.Context(), clientID)
+	if err != nil {
+		errors.HTTPError(w, errors.NewInternalError("Failed to validate client", err))
+		return
+	}
+	if app == nil {
+		errors.HTTPError(w, errors.NewAuthorizationError("Invalid client ID", nil))
+		return
+	}
+
+	// 交换授权码获取令牌
 	accessToken, idToken, err := h.authService.ExchangeCodeForTokens(r.Context(), code, clientID)
 	if err != nil {
-		http.Error(w, "invalid_grant", http.StatusBadRequest)
+		errors.HTTPError(w, errors.NewInternalError("Failed to exchange code for tokens", err))
 		return
 	}
 
-	resp := TokenResponse{
+	// 返回令牌
+	response := TokenResponse{
 		AccessToken: accessToken,
 		IDToken:     idToken,
 		TokenType:   "Bearer",
@@ -132,5 +131,49 @@ func (h *AuthHandler) HandleToken(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(resp)
+	json.NewEncoder(w).Encode(response)
+}
+
+func (h *AuthHandler) HandleAuthorize(w http.ResponseWriter, r *http.Request) {
+	clientID := r.URL.Query().Get("client_id")
+	redirectURI := r.URL.Query().Get("redirect_uri")
+	responseType := r.URL.Query().Get("response_type")
+
+	if responseType != "code" {
+		errors.HTTPError(w, errors.NewBadRequestError("Unsupported response type", nil))
+		return
+	}
+
+	if clientID == "" || redirectURI == "" {
+		errors.HTTPError(w, errors.NewBadRequestError("Missing required parameters", nil))
+		return
+	}
+
+	// 验证客户端应用
+	app, err := h.applicationRepo.GetByClientID(r.Context(), clientID)
+	if err != nil {
+		errors.HTTPError(w, errors.NewInternalError("Failed to validate client", err))
+		return
+	}
+	if app == nil {
+		errors.HTTPError(w, errors.NewAuthorizationError("Invalid client ID", nil))
+		return
+	}
+
+	// 验证重定向URI
+	validRedirectURI := false
+	for _, uri := range app.RedirectURIs {
+		if uri == redirectURI {
+			validRedirectURI = true
+			break
+		}
+	}
+	if !validRedirectURI {
+		errors.HTTPError(w, errors.NewBadRequestError("Invalid redirect URI", nil))
+		return
+	}
+
+	// TODO: 实现用户认证和授权页面的渲染
+	// 这里应该渲染一个登录页面或授权页面，让用户进行身份验证并授权应用访问
+	// 用户授权后，生成授权码并重定向到应用的回调地址
 }

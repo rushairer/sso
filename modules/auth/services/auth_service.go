@@ -5,12 +5,12 @@ import (
 	"crypto/rsa"
 	"database/sql"
 	"encoding/json"
-	"errors"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
+	"github.com/rushairer/sso/utils/errors"
 )
 
 type AuthService struct {
@@ -46,7 +46,7 @@ func (s *AuthService) ValidateCredentials(ctx context.Context, username, passwor
 		"SELECT id, password FROM accounts WHERE username = $1",
 		username).Scan(&userID, &hashedPassword)
 	if err != nil {
-		return "", err
+		return "", errors.NewNotFoundError("User not found", err)
 	}
 
 	// TODO: 实现密码验证逻辑
@@ -62,12 +62,12 @@ func (s *AuthService) CreateSession(ctx context.Context, userID string) (string,
 
 	sessionJSON, err := json.Marshal(sessionData)
 	if err != nil {
-		return "", err
+		return "", errors.NewInternalError("Failed to create session", err)
 	}
 
 	err = s.redis.Set(ctx, "session:"+sessionID, sessionJSON, 24*time.Hour).Err()
 	if err != nil {
-		return "", err
+		return "", errors.NewInternalError("Failed to store session", err)
 	}
 
 	return sessionID, nil
@@ -76,17 +76,17 @@ func (s *AuthService) CreateSession(ctx context.Context, userID string) (string,
 func (s *AuthService) ValidateSession(ctx context.Context, sessionID string) (string, error) {
 	sessionJSON, err := s.redis.Get(ctx, "session:"+sessionID).Result()
 	if err != nil {
-		return "", err
+		return "", errors.NewNotFoundError("Session not found", err)
 	}
 
 	var sessionData map[string]interface{}
 	if err := json.Unmarshal([]byte(sessionJSON), &sessionData); err != nil {
-		return "", err
+		return "", errors.NewInternalError("Failed to parse session data", err)
 	}
 
 	userID, ok := sessionData["user_id"].(string)
 	if !ok {
-		return "", errors.New("invalid session data")
+		return "", errors.NewValidationError("Invalid session data", nil)
 	}
 
 	return userID, nil
@@ -101,12 +101,12 @@ func (s *AuthService) GenerateAuthorizationCode(ctx context.Context, sessionID, 
 
 	codeJSON, err := json.Marshal(codeData)
 	if err != nil {
-		return "", err
+		return "", errors.NewInternalError("Failed to generate authorization code", err)
 	}
 
 	err = s.redis.Set(ctx, "code:"+code, codeJSON, 10*time.Minute).Err()
 	if err != nil {
-		return "", err
+		return "", errors.NewInternalError("Failed to store authorization code", err)
 	}
 
 	return code, nil
@@ -115,16 +115,16 @@ func (s *AuthService) GenerateAuthorizationCode(ctx context.Context, sessionID, 
 func (s *AuthService) ExchangeCodeForTokens(ctx context.Context, code, clientID string) (string, string, error) {
 	codeJSON, err := s.redis.Get(ctx, "code:"+code).Result()
 	if err != nil {
-		return "", "", err
+		return "", "", errors.NewNotFoundError("Authorization code not found", err)
 	}
 
 	var codeData map[string]string
 	if err := json.Unmarshal([]byte(codeJSON), &codeData); err != nil {
-		return "", "", err
+		return "", "", errors.NewInternalError("Failed to parse authorization code", err)
 	}
 
 	if codeData["client_id"] != clientID {
-		return "", "", errors.New("invalid client_id")
+		return "", "", errors.NewValidationError("Invalid client ID", nil)
 	}
 
 	userID, err := s.ValidateSession(ctx, codeData["session_id"])
@@ -135,7 +135,7 @@ func (s *AuthService) ExchangeCodeForTokens(ctx context.Context, code, clientID 
 	// 生成访问令牌
 	accessToken, err := s.generateJWT(userID, clientID, codeData["session_id"])
 	if err != nil {
-		return "", "", err
+		return "", "", errors.NewInternalError("Failed to generate access token", err)
 	}
 
 	// 生成ID令牌（简化版本）

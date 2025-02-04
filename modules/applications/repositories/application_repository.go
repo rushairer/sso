@@ -8,15 +8,23 @@ import (
 	"github.com/rushairer/sso/modules/applications/models"
 )
 
-type ApplicationRepository struct {
+// ApplicationRepository 应用仓储接口
+type ApplicationRepository interface {
+	Create(ctx context.Context, app *models.Application) error
+	GetByClientID(ctx context.Context, clientID string) (*models.Application, error)
+	ValidateClientCredentials(ctx context.Context, clientID, clientSecret string) bool
+}
+
+// applicationRepository 应用仓储实现
+type applicationRepository struct {
 	db *sql.DB
 }
 
-func NewApplicationRepository(db *sql.DB) *ApplicationRepository {
-	return &ApplicationRepository{db: db}
+func NewApplicationRepository(db *sql.DB) ApplicationRepository {
+	return &applicationRepository{db: db}
 }
 
-func (r *ApplicationRepository) Create(ctx context.Context, app *models.Application) error {
+func (r *applicationRepository) Create(ctx context.Context, app *models.Application) error {
 	redirectURIsJSON, err := json.Marshal(app.RedirectURIs)
 	if err != nil {
 		return err
@@ -38,7 +46,7 @@ func (r *ApplicationRepository) Create(ctx context.Context, app *models.Applicat
 	return err
 }
 
-func (r *ApplicationRepository) GetByClientID(ctx context.Context, clientID string) (*models.Application, error) {
+func (r *applicationRepository) GetByClientID(ctx context.Context, clientID string) (*models.Application, error) {
 	query := `
 		SELECT BIN_TO_UUID(id), name, client_id, client_secret, redirect_uris, created_at, updated_at
 		FROM applications
@@ -71,7 +79,7 @@ func (r *ApplicationRepository) GetByClientID(ctx context.Context, clientID stri
 	return app, nil
 }
 
-func (r *ApplicationRepository) ValidateClientCredentials(ctx context.Context, clientID, clientSecret string) bool {
+func (r *applicationRepository) ValidateClientCredentials(ctx context.Context, clientID, clientSecret string) bool {
 	query := `
 		SELECT COUNT(*)
 		FROM applications
