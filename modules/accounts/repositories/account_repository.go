@@ -13,6 +13,7 @@ type AccountRepository interface {
 	CreateAccount(ctx context.Context, account *models.Account) error
 	GetAccountByID(ctx context.Context, id string) (*models.Account, error)
 	GetAccountWithDetails(ctx context.Context, id string) (*models.Account, *models.UserDetail, error)
+	GetAccountByUsername(ctx context.Context, username string) (*models.Account, error)
 }
 
 // accountRepository 账户仓储实现
@@ -60,6 +61,39 @@ func (r *accountRepository) GetAccountByID(ctx context.Context, id string) (*mod
 		WHERE id = UUID_TO_BIN(?) AND deleted_at IS NULL
 	`
 	err := r.db.QueryRowContext(ctx, query, id).Scan(
+		&account.ID,
+		&account.Email,
+		&account.Password,
+		&account.Status,
+		&account.CreatedAt,
+		&account.UpdatedAt,
+		&account.DeletedAt,
+		&account.EmailVerifiedAt,
+		&account.LastLoginAt,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return account, nil
+}
+
+func (r *accountRepository) GetAccountByUsername(ctx context.Context, username string) (*models.Account, error) {
+	account := &models.Account{}
+	query := `
+		SELECT
+			UUID_FROM_BIN(id) as id,
+			email,
+			password,
+			status,
+			created_at,
+			updated_at,
+			deleted_at,
+			email_verified_at,
+			last_login_at
+		FROM accounts
+		WHERE email = ? AND deleted_at IS NULL
+	`
+	err := r.db.QueryRowContext(ctx, query, username).Scan(
 		&account.ID,
 		&account.Email,
 		&account.Password,

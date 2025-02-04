@@ -5,27 +5,17 @@ import (
 	"net/http"
 	"net/url"
 
-	accountsRepositories "github.com/rushairer/sso/modules/accounts/repositories"
-	applicationsRepositories "github.com/rushairer/sso/modules/applications/repositories"
 	"github.com/rushairer/sso/modules/auth/services"
 	"github.com/rushairer/sso/utils/errors"
 )
 
 type AuthHandler struct {
-	authService     *services.AuthService
-	accountRepo     accountsRepositories.AccountRepository
-	applicationRepo applicationsRepositories.ApplicationRepository
+	authService *services.AuthService
 }
 
-func NewAuthHandler(
-	authService *services.AuthService,
-	accountRepo accountsRepositories.AccountRepository,
-	applicationRepo applicationsRepositories.ApplicationRepository,
-) *AuthHandler {
+func NewAuthHandler(authService *services.AuthService) *AuthHandler {
 	return &AuthHandler{
-		authService:     authService,
-		accountRepo:     accountRepo,
-		applicationRepo: applicationRepo,
+		authService: authService,
 	}
 }
 
@@ -105,13 +95,9 @@ func (h *AuthHandler) HandleToken(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// 验证客户端应用
-	app, err := h.applicationRepo.GetByClientID(r.Context(), clientID)
+	_, err := h.authService.ValidateClient(r.Context(), clientID)
 	if err != nil {
-		errors.HTTPError(w, errors.NewInternalError("Failed to validate client", err))
-		return
-	}
-	if app == nil {
-		errors.HTTPError(w, errors.NewAuthorizationError("Invalid client ID", nil))
+		errors.HTTPError(w, err)
 		return
 	}
 
@@ -150,25 +136,14 @@ func (h *AuthHandler) HandleAuthorize(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// 验证客户端应用
-	app, err := h.applicationRepo.GetByClientID(r.Context(), clientID)
+	app, err := h.authService.ValidateClient(r.Context(), clientID)
 	if err != nil {
-		errors.HTTPError(w, errors.NewInternalError("Failed to validate client", err))
-		return
-	}
-	if app == nil {
-		errors.HTTPError(w, errors.NewAuthorizationError("Invalid client ID", nil))
+		errors.HTTPError(w, err)
 		return
 	}
 
 	// 验证重定向URI
-	validRedirectURI := false
-	for _, uri := range app.RedirectURIs {
-		if uri == redirectURI {
-			validRedirectURI = true
-			break
-		}
-	}
-	if !validRedirectURI {
+	if !h.authService.ValidateRedirectURI(app, redirectURI) {
 		errors.HTTPError(w, errors.NewBadRequestError("Invalid redirect URI", nil))
 		return
 	}

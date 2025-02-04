@@ -3,21 +3,24 @@ package services
 import (
 	"context"
 	"crypto/rsa"
-	"database/sql"
 	"encoding/json"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
+	accountsRepositories "github.com/rushairer/sso/modules/accounts/repositories"
+	applicationsModels "github.com/rushairer/sso/modules/applications/models"
+	applicationsRepositories "github.com/rushairer/sso/modules/applications/repositories"
 	"github.com/rushairer/sso/utils/errors"
 )
 
 type AuthService struct {
-	db          *sql.DB
-	redis       *redis.Client
-	privateKey  *rsa.PrivateKey
-	tokenExpiry time.Duration
+	accountRepo     accountsRepositories.AccountRepository
+	applicationRepo applicationsRepositories.ApplicationRepository
+	redis           *redis.Client
+	privateKey      *rsa.PrivateKey
+	tokenExpiry     time.Duration
 }
 
 type TokenClaims struct {
@@ -28,29 +31,29 @@ type TokenClaims struct {
 	SessionID string `json:"session_id"`
 }
 
-func NewAuthService(db *sql.DB, redis *redis.Client, privateKey *rsa.PrivateKey) *AuthService {
+func NewAuthService(
+	accountRepo accountsRepositories.AccountRepository,
+	applicationRepo applicationsRepositories.ApplicationRepository,
+	redis *redis.Client,
+	privateKey *rsa.PrivateKey,
+) *AuthService {
 	return &AuthService{
-		db:          db,
-		redis:       redis,
-		privateKey:  privateKey,
-		tokenExpiry: 24 * time.Hour,
+		accountRepo:     accountRepo,
+		applicationRepo: applicationRepo,
+		redis:           redis,
+		privateKey:      privateKey,
+		tokenExpiry:     24 * time.Hour,
 	}
 }
 
 func (s *AuthService) ValidateCredentials(ctx context.Context, username, password string) (string, error) {
-	var (
-		userID         string
-		hashedPassword string
-	)
-	err := s.db.QueryRowContext(ctx,
-		"SELECT id, password FROM accounts WHERE username = $1",
-		username).Scan(&userID, &hashedPassword)
+	account, err := s.accountRepo.GetAccountByUsername(ctx, username)
 	if err != nil {
 		return "", errors.NewNotFoundError("User not found", err)
 	}
 
 	// TODO: 实现密码验证逻辑
-	return userID, nil
+	return account.ID, nil
 }
 
 func (s *AuthService) CreateSession(ctx context.Context, userID string) (string, error) {
@@ -110,6 +113,26 @@ func (s *AuthService) GenerateAuthorizationCode(ctx context.Context, sessionID, 
 	}
 
 	return code, nil
+}
+
+func (s *AuthService) ValidateClient(ctx context.Context, clientID string) (*applicationsModels.Application, error) {
+	app, err := s.applicationRepo.GetByClientID(ctx, clientID)
+	if err != nil {
+		return nil, errors.NewInternalError("Failed to validate client", err)
+	}
+	if app == nil {
+		return nil, errors.NewAuthorizationError("Invalid client ID", nil)
+	}
+	return app, nil
+}
+
+func (s *AuthService) ValidateRedirectURI(app *applicationsModels.Application, redirectURI string) bool {
+	for _, uri := range app.RedirectURIs {
+		if uri == redirectURI {
+			return true
+		}
+	}
+	return false
 }
 
 func (s *AuthService) ExchangeCodeForTokens(ctx context.Context, code, clientID string) (string, string, error) {

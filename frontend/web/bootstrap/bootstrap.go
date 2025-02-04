@@ -28,8 +28,8 @@ func SetupServer(server *gin.Engine) error {
 	// 初始化认证相关的服务和处理器
 	accountRepo := accountsRepositories.NewAccountRepository(db)
 	applicationRepo := applicationsRepositories.NewApplicationRepository(db)
-	authService := services.NewAuthService(db, redisClient, nil) // TODO: 添加私钥配置
-	authHandler := handlers.NewAuthHandler(authService, accountRepo, applicationRepo)
+	authService := services.NewAuthService(accountRepo, applicationRepo, redisClient, nil) // TODO: 添加私钥配置
+	authHandler := handlers.NewAuthHandler(authService)
 
 	// 认证相关路由
 	authGroup := server.Group("/auth")
