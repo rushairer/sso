@@ -55,10 +55,7 @@ func TestAccountRole_Validation(t *testing.T) {
 }
 
 func TestAccountRole_TimeFields(t *testing.T) {
-	accountRole := &models.AccountRole{
-		AccountID: uuid.New().String(),
-		RoleID:    uuid.New().String(),
-	}
+	accountRole := &models.AccountRole{}
 
 	// 测试时间字段的设置和获取
 	now := time.Now()

@@ -131,7 +131,7 @@ func TestGetByClientID(t *testing.T) {
 					testID, "测试应用", "test-client-id", "test-secret",
 					string(redirectURIsJSON), testTime, testTime,
 				)
-				mock.ExpectQuery("SELECT BIN_TO_UUID\\(id\\), name, client_id").WithArgs("test-client-id").WillReturnRows(rows)
+				mock.ExpectQuery("SELECT BIN_TO_UUID\\(id\\), name, client_id.* FROM applications").WithArgs("test-client-id").WillReturnRows(rows)
 			},
 			wantErr: false,
 		},
@@ -139,7 +139,7 @@ func TestGetByClientID(t *testing.T) {
 			name:     "应用不存在",
 			clientID: "non-exist-client-id",
 			mockFn: func() {
-				mock.ExpectQuery("SELECT BIN_TO_UUID\\(id\\), name, client_id").WithArgs("non-exist-client-id").WillReturnError(sql.ErrNoRows)
+				mock.ExpectQuery("SELECT BIN_TO_UUID\\(id\\), name, client_id.* FROM applications").WithArgs("non-exist-client-id").WillReturnError(sql.ErrNoRows)
 			},
 			wantErr: false,
 		},
@@ -189,7 +189,7 @@ func TestValidateClientCredentials(t *testing.T) {
 			clientSecret: "test-secret",
 			mockFn: func() {
 				rows := sqlmock.NewRows([]string{"count"}).AddRow(1)
-				mock.ExpectQuery("SELECT COUNT\\(\\*\\)").WithArgs(
+				mock.ExpectQuery("SELECT COUNT\\(\\*\\) FROM applications").WithArgs(
 					"test-client-id", "test-secret",
 				).WillReturnRows(rows)
 			},
@@ -201,7 +201,7 @@ func TestValidateClientCredentials(t *testing.T) {
 			clientSecret: "wrong-secret",
 			mockFn: func() {
 				rows := sqlmock.NewRows([]string{"count"}).AddRow(0)
-				mock.ExpectQuery("SELECT COUNT\\(\\*\\)").WithArgs(
+				mock.ExpectQuery("SELECT COUNT\\(\\*\\) FROM applications").WithArgs(
 					"test-client-id", "wrong-secret",
 				).WillReturnRows(rows)
 			},

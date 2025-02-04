@@ -92,12 +92,7 @@ func TestAccount_Validation(t *testing.T) {
 }
 
 func TestAccount_TimeFields(t *testing.T) {
-	account := &models.Account{
-		ID:       uuid.New().String(),
-		Email:    "test@example.com",
-		Password: "password123",
-		Status:   1,
-	}
+	account := &models.Account{}
 
 	// 测试时间字段的设置和获取
 	now := time.Now()

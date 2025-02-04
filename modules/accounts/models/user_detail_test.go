@@ -64,11 +64,7 @@ func TestUserDetail_Validation(t *testing.T) {
 }
 
 func TestUserDetail_TimeFields(t *testing.T) {
-	userDetail := &models.UserDetail{
-		AccountID: uuid.New().String(),
-		NickName:  "测试用户",
-		Gender:    1,
-	}
+	userDetail := &models.UserDetail{}
 
 	// 测试时间字段的设置和获取
 	now := time.Now()

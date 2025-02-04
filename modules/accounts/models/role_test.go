@@ -56,11 +56,7 @@ func TestRole_Validation(t *testing.T) {
 }
 
 func TestRole_TimeFields(t *testing.T) {
-	role := &models.Role{
-		ID:          uuid.New().String(),
-		Name:        "测试角色",
-		Description: "测试角色描述",
-	}
+	role := &models.Role{}
 
 	// 测试时间字段的设置和获取
 	now := time.Now()
