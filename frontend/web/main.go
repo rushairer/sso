@@ -27,7 +27,10 @@ func main() {
 	if err != nil {
 		log.Println("db error:", err)
 	}
-	migrations(db)
+
+	if gin.IsDebugging() {
+		migrations(db)
+	}
 
 	log.Println("starting...")
 	server := gin.Default()

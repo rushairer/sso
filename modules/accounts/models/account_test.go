@@ -24,7 +24,7 @@ func TestAccount_Validation(t *testing.T) {
 				ID:       uuid.New().String(),
 				Email:    "test@example.com",
 				Password: "password123",
-				Status:   1,
+				Status:   models.AccountStatusNormal,
 				CreatedAt: sql.NullTime{
 					Time:  time.Now(),
 					Valid: true,
@@ -38,7 +38,7 @@ func TestAccount_Validation(t *testing.T) {
 				ID:       uuid.New().String(),
 				Email:    "invalid-email",
 				Password: "password123",
-				Status:   1,
+				Status:   models.AccountStatusNormal,
 			},
 			isValid: false,
 		},
@@ -48,7 +48,7 @@ func TestAccount_Validation(t *testing.T) {
 				ID:       uuid.New().String(),
 				Email:    "test@",
 				Password: "password123",
-				Status:   1,
+				Status:   models.AccountStatusNormal,
 			},
 			isValid: false,
 		},
@@ -58,7 +58,7 @@ func TestAccount_Validation(t *testing.T) {
 				ID:       uuid.New().String(),
 				Email:    "test@invalid.",
 				Password: "password123",
-				Status:   1,
+				Status:   models.AccountStatusNormal,
 			},
 			isValid: false,
 		},
@@ -68,7 +68,7 @@ func TestAccount_Validation(t *testing.T) {
 				ID:       uuid.New().String(),
 				Email:    "test@example.com",
 				Password: "password123",
-				Status:   3, // 无效的状态值
+				Status:   127, // 无效的状态值
 			},
 			isValid: false,
 		},
@@ -84,7 +84,7 @@ func TestAccount_Validation(t *testing.T) {
 				tt.account.Email != "" &&
 				emailRegex.MatchString(tt.account.Email) &&
 				tt.account.Password != "" &&
-				(tt.account.Status >= -1 && tt.account.Status <= 1)
+				tt.account.IsValidStatus()
 
 			assert.Equal(t, tt.isValid, isValid)
 		})
