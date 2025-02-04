@@ -8,7 +8,7 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
-	"github.com/redis/go-redis/v9"
+	"github.com/rushairer/sso/databases"
 	accountsRepositories "github.com/rushairer/sso/modules/accounts/repositories"
 	applicationsModels "github.com/rushairer/sso/modules/applications/models"
 	applicationsRepositories "github.com/rushairer/sso/modules/applications/repositories"
@@ -18,7 +18,7 @@ import (
 type AuthService struct {
 	accountRepo     accountsRepositories.AccountRepository
 	applicationRepo applicationsRepositories.ApplicationRepository
-	redis           *redis.Client
+	redis           databases.RedisClient
 	privateKey      *rsa.PrivateKey
 	tokenExpiry     time.Duration
 }
@@ -34,7 +34,7 @@ type TokenClaims struct {
 func NewAuthService(
 	accountRepo accountsRepositories.AccountRepository,
 	applicationRepo applicationsRepositories.ApplicationRepository,
-	redis *redis.Client,
+	redis databases.RedisClient,
 	privateKey *rsa.PrivateKey,
 ) *AuthService {
 	return &AuthService{

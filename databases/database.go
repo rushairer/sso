@@ -42,7 +42,7 @@ func InitDB() (*sql.DB, error) {
 }
 
 // InitRedis 初始化Redis连接
-func InitRedis() (*redis.Client, error) {
+func InitRedis() (RedisClient, error) {
 	var err error
 	once.Do(func() {
 		redisClient = redis.NewClient(&redis.Options{
@@ -62,7 +62,7 @@ func InitRedis() (*redis.Client, error) {
 		return nil, errors.NewInternalError("Redis connection failed", err)
 	}
 
-	return redisClient, nil
+	return NewRedisClient(redisClient), nil
 }
 
 // CloseDB 关闭数据库连接
