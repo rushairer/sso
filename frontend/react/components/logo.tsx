@@ -7,8 +7,8 @@ export function Logo() {
             <Image
                 src="/Logo.svg"
                 alt="SSO Logo"
-                width={139}
-                height={48}
+                width={104}
+                height={36}
                 className="dark:invert"
                 priority
             />

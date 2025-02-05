@@ -37,9 +37,11 @@ export default function RootLayout({
                     enableSystem
                     disableTransitionOnChange
                 >
-                    <Logo />
-                    <ThemeToggle />
-                    {children}
+                    <div className="fixed top-0 left-0 right-0 z-50 h-16 flex items-center justify-between px-8 backdrop-blur-md bg-background/90 border-b border-border/40 shadow-sm">
+                        <Logo />
+                        <ThemeToggle />
+                    </div>
+                    <div className="pt-16">{children}</div>
                 </ThemeProvider>
             </body>
         </html>
