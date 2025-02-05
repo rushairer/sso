@@ -132,8 +132,8 @@ export function RegisterForm({
                 </CardContent>
             </Card>
             <div className="text-balance text-center text-xs text-muted-foreground [&_a]:underline [&_a]:underline-offset-4 hover:[&_a]:text-primary">
-                点击继续，即表示您同意我们的 <a href="#">服务条款</a> 和{' '}
-                <a href="#">隐私政策</a>。
+                点击继续，即表示您同意我们的 <a href="/terms">服务条款</a> 和{' '}
+                <a href="/privacy">隐私政策</a>。
             </div>
         </div>
     )
