@@ -1,0 +1,217 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600">
+  <defs>
+    <linearGradient id="bg-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF4E00" />
+      <stop offset="100%" style="stop-color:#8B0000" />
+    </linearGradient>
+    <filter id="matrix-effect">
+      <feTurbulence type="fractalNoise" baseFrequency="0.01" numOctaves="2" result="noise" />
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="5" />
+    </filter>
+    <mask id="fade-mask">
+      <rect width="800" height="600" fill="url(#fade-gradient)" />
+    </mask>
+    <linearGradient id="fade-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:white;stop-opacity:0.9" />
+      <stop offset="100%" style="stop-color:white;stop-opacity:0.6" />
+    </linearGradient>
+  </defs>
+
+  <!-- 背景渐变 -->
+  <rect width="800" height="600" fill="url(#bg-gradient)" />
+
+  <!-- 网格纹理 -->
+  <path d="M0 50 L800 50 M0 150 L800 150 M0 250 L800 250 M0 350 L800 350 M0 450 L800 450 M0 550 L800 550 M50 0 L50 600 M150 0 L150 600 M250 0 L250 600 M350 0 L350 600 M450 0 L450 600 M550 0 L550 600 M650 0 L650 600 M750 0 L750 600" stroke="rgba(255,255,255,0.1)" stroke-width="1" />
+
+  <!-- 数字雨效果 -->
+  <g filter="url(#matrix-effect)" opacity="0.15">
+    <g>
+      <!-- 左侧密集列 -->
+      <text x="15" y="-50" fill="white" font-family="monospace" class="matrix-rain">
+        <animate attributeName="y" from="-50" to="650" dur="7.5s" repeatCount="indefinite" />
+        10110101
+      </text>
+      <text x="15" y="-150" fill="white" font-family="monospace" class="matrix-rain">
+        <animate attributeName="y" from="-150" to="650" dur="8.4s" repeatCount="indefinite" />
+        01001011
+      </text>
+      <text x="15" y="-250" fill="white" font-family="monospace" class="matrix-rain">
+        <animate attributeName="y" from="-250" to="650" dur="7.8s" repeatCount="indefinite" />
+        11010010
+      </text>
+      <text x="15" y="-350" fill="white" font-family="monospace" class="matrix-rain">
+        <animate attributeName="y" from="-350" to="650" dur="8.1s" repeatCount="indefinite" />
+        10101011
+      </text>
+      <text x="15" y="-450" fill="white" font-family="monospace" class="matrix-rain">
+        <animate attributeName="y" from="-450" to="650" dur="7.7s" repeatCount="indefinite" />
+        01011010
+      </text>
+      <text x="15" y="-550" fill="white" font-family="monospace" class="matrix-rain">
+        <animate attributeName="y" from="-550" to="650" dur="8.2s" repeatCount="indefinite" />
+        11001101
+      </text>
+      <text x="45" y="-100" fill="white" font-family="monospace" class="matrix-rain">
+        <animate attributeName="y" from="-100" to="650" dur="9s" repeatCount="indefinite" />
+        11100101
+      </text>
+      <text x="45" y="-200" fill="white" font-family="monospace" class="matrix-rain">
+        <animate attributeName="y" from="-200" to="650" dur="5.2s" repeatCount="indefinite" />
+        00110110
+      </text>
+      <text x="45" y="-300" fill="white" font-family="monospace" class="matrix-rain">
+        <animate attributeName="y" from="-300" to="650" dur="5.8s" repeatCount="indefinite" />
+        10101011
+      </text>
+      <!-- 中间密集列 -->
+      <text x="75" y="-75" fill="white" font-family="monospace" class="matrix-rain">
+        <animate attributeName="y" from="-75" to="650" dur="8.1s" repeatCount="indefinite" />
+        10011010
+      </text>
+      <text x="75" y="-175" fill="white" font-family="monospace" class="matrix-rain">
+        <animate attributeName="y" from="-175" to="650" dur="9.3s" repeatCount="indefinite" />
+        01101001
+      </text>
+      <text x="75" y="-275" fill="white" font-family="monospace" class="matrix-rain">
+        <animate attributeName="y" from="-275" to="650" dur="8.4s" repeatCount="indefinite" />
+        11001101
+      </text>
+      <text x="75" y="-375" fill="white" font-family="monospace" class="matrix-rain">
+        <animate attributeName="y" from="-375" to="650" dur="8.7s" repeatCount="indefinite" />
+        10110011
+      </text>
+      <text x="75" y="-475" fill="white" font-family="monospace" class="matrix-rain">
+        <animate attributeName="y" from="-475" to="650" dur="9.1s" repeatCount="indefinite" />
+        01011100
+      </text>
+      <text x="75" y="-575" fill="white" font-family="monospace" class="matrix-rain">
+        <animate attributeName="y" from="-575" to="650" dur="8.9s" repeatCount="indefinite" />
+        11010101
+      </text>
+      <text x="105" y="-125" fill="white" font-family="monospace" class="matrix-rain">
+        <animate attributeName="y" from="-125" to="650" dur="2.9s" repeatCount="indefinite" />
+        11010110
+      </text>
+      <!-- 更多密集列 -->
+      <text x="135" y="-150" fill="white" font-family="monospace" class="matrix-rain">
+        <animate attributeName="y" from="-150" to="650" dur="3.6s" repeatCount="indefinite" />
+        00101101
+      </text>
+      <text x="165" y="-80" fill="white" font-family="monospace" class="matrix-rain">
+        <animate attributeName="y" from="-80" to="650" dur="2.8s" repeatCount="indefinite" />
+        10110010
+      </text>
+      <!-- 中部列 -->
+      <text x="195" y="-180" fill="white" font-family="monospace" class="matrix-rain">
+        <animate attributeName="y" from="-180" to="650" dur="6.0s" repeatCount="indefinite" />
+        01011001
+      </text>
+      <text x="195" y="-280" fill="white" font-family="monospace" class="matrix-rain">
+        <animate attributeName="y" from="-280" to="650" dur="5.8s" repeatCount="indefinite" />
+        10110010
+      </text>
+      <text x="195" y="-380" fill="white" font-family="monospace" class="matrix-rain">
+        <animate attributeName="y" from="-380" to="650" dur="6.2s" repeatCount="indefinite" />
+        11001010
+      </text>
+      <text x="225" y="-150" fill="white" font-family="monospace" class="matrix-rain">
+        <animate attributeName="y" from="-150" to="650" dur="5.0s" repeatCount="indefinite" />
+        11001010
+      </text>
+      <text x="225" y="-250" fill="white" font-family="monospace" class="matrix-rain">
+        <animate attributeName="y" from="-250" to="650" dur="5.2s" repeatCount="indefinite" />
+        01110011
+      </text>
+      <text x="225" y="-350" fill="white" font-family="monospace" class="matrix-rain">
+        <animate attributeName="y" from="-350" to="650" dur="5.4s" repeatCount="indefinite" />
+        10010110
+      </text>
+      <!-- 右侧密集列 -->
+      <text x="255" y="-200" fill="white" font-family="monospace" class="matrix-rain">
+        <animate attributeName="y" from="-200" to="650" dur="5.4s" repeatCount="indefinite" />
+        01110011
+      </text>
+      <text x="255" y="-300" fill="white" font-family="monospace" class="matrix-rain">
+        <animate attributeName="y" from="-300" to="650" dur="5.6s" repeatCount="indefinite" />
+        10010110
+      </text>
+      <text x="255" y="-400" fill="white" font-family="monospace" class="matrix-rain">
+        <animate attributeName="y" from="-400" to="650" dur="5.8s" repeatCount="indefinite" />
+        01101100
+      </text>
+      <text x="315" y="-175" fill="white" font-family="monospace" class="matrix-rain">
+        <animate attributeName="y" from="-175" to="650" dur="2.6s" repeatCount="indefinite" />
+        01101100
+      </text>
+      <!-- 更多右侧列 -->
+      <text x="345" y="-125" fill="white" font-family="monospace" class="matrix-rain">
+        <animate attributeName="y" from="-125" to="650" dur="2.8s" repeatCount="indefinite" />
+        11010011
+      </text>
+      <text x="375" y="-225" fill="white" font-family="monospace" class="matrix-rain">
+        <animate attributeName="y" from="-225" to="650" dur="3.0s" repeatCount="indefinite" />
+        00111010
+      </text>
+      <!-- 最右侧列 -->
+      <text x="405" y="-150" fill="white" font-family="monospace" class="matrix-rain">
+        <animate attributeName="y" from="-150" to="650" dur="5.4s" repeatCount="indefinite" />
+        10101101
+      </text>
+      <text x="435" y="-100" fill="white" font-family="monospace" class="matrix-rain">
+        <animate attributeName="y" from="-100" to="650" dur="5.0s" repeatCount="indefinite" />
+        01011010
+      </text>
+      <!-- 新增更多列以提高密度 -->
+      <text x="465" y="-180" fill="white" font-family="monospace" class="matrix-rain">
+        <animate attributeName="y" from="-180" to="650" dur="5.6s" repeatCount="indefinite" />
+        11001100
+      </text>
+      <text x="495" y="-120" fill="white" font-family="monospace" class="matrix-rain">
+        <animate attributeName="y" from="-120" to="650" dur="5.2s" repeatCount="indefinite" />
+        01110110
+      </text>
+      <text x="525" y="-200" fill="white" font-family="monospace" class="matrix-rain">
+        <animate attributeName="y" from="-200" to="650" dur="6.0s" repeatCount="indefinite" />
+        10011011
+      </text>
+      <text x="555" y="-150" fill="white" font-family="monospace" class="matrix-rain">
+        <animate attributeName="y" from="-150" to="650" dur="5.4s" repeatCount="indefinite" />
+        11100010
+      </text>
+      <text x="585" y="-90" fill="white" font-family="monospace" class="matrix-rain">
+        <animate attributeName="y" from="-90" to="650" dur="5.8s" repeatCount="indefinite" />
+        01001101
+      </text>
+      <text x="615" y="-170" fill="white" font-family="monospace" class="matrix-rain">
+        <animate attributeName="y" from="-170" to="650" dur="5.0s" repeatCount="indefinite" />
+        10110011
+      </text>
+      <text x="645" y="-130" fill="white" font-family="monospace" class="matrix-rain">
+        <animate attributeName="y" from="-130" to="650" dur="5.6s" repeatCount="indefinite" />
+        11001101
+      </text>
+      <text x="675" y="-210" fill="white" font-family="monospace" class="matrix-rain">
+        <animate attributeName="y" from="-210" to="650" dur="6.2s" repeatCount="indefinite" />
+        01110010
+      </text>
+      <text x="705" y="-160" fill="white" font-family="monospace" class="matrix-rain">
+        <animate attributeName="y" from="-160" to="650" dur="5.2s" repeatCount="indefinite" />
+        10011100
+      </text>
+      <text x="735" y="-140" fill="white" font-family="monospace" class="matrix-rain">
+        <animate attributeName="y" from="-140" to="650" dur="5.8s" repeatCount="indefinite" />
+        11010101
+      </text>
+      <text x="765" y="-190" fill="white" font-family="monospace" class="matrix-rain">
+        <animate attributeName="y" from="-190" to="650" dur="5.4s" repeatCount="indefinite" />
+        01101011
+      </text>
+    </g>
+  </g>
+
+  <!-- 标题和 Slogan -->
+  <g mask="url(#fade-mask)">
+    <text x="400" y="250" fill="white" font-size="36" font-weight="bold" text-anchor="middle" font-family="'PingFang SC', -apple-system, sans-serif">SSO · 统一身份认证</text>
+    <text x="400" y="300" fill="rgba(255,255,255,0.8)" font-size="18" text-anchor="middle" font-family="'PingFang SC', -apple-system, sans-serif">连接开发者，守护数字世界</text>
+  </g>
+</svg>
