@@ -22,7 +22,7 @@ export default function RootLayout({
     children: React.ReactNode
 }>) {
     const pathname = usePathname()
-    const noBackgroundPaths = ['/login', '/register', '/reset-password']
+    const noBackgroundPaths = ['/', '/login', '/register', '/reset-password']
     const shouldShowBackground = !noBackgroundPaths.includes(pathname)
 
     return (
