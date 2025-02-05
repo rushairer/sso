@@ -7,7 +7,7 @@ export default function PrivacyPage() {
         <div>
             <div className="mx-auto container py-10">
                 <div className="mx-auto max-w-3xl">
-                    <Card className="shadow-sm">
+                    <Card>
                         <CardContent className="p-6 pb-8 pt-8">
                             <h1 className="mb-8 text-3xl font-bold">
                                 隐私政策

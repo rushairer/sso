@@ -5,9 +5,9 @@ import { Card, CardContent } from '@/components/ui/card'
 export default function TermsPage() {
     return (
         <div>
-            <div className="container mx-auto py-10">
+            <div className="container mx-auto py-10 ">
                 <div className="mx-auto max-w-3xl">
-                    <Card className="shadow-sm">
+                    <Card>
                         <CardContent className="p-6 pb-8 pt-8">
                             <section className="mb-6">
                                 <h2 className="mb-4 text-xl font-semibold">
