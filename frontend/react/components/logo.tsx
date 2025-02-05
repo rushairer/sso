@@ -5,7 +5,7 @@ export function Logo() {
     return (
         <Link href="/" className="fixed left-4 top-4">
             <Image
-                src="/Logo.svg"
+                src="/logo.svg"
                 alt="SSO Logo"
                 width={104}
                 height={36}

@@ -55,10 +55,15 @@ func SetupServer(server *gin.Engine) error {
 		server.Static("/_next", "./frontend/web/public/_next")
 
 		server.StaticFile("/", "./frontend/web/public/index.html")
+		server.StaticFile("/login", "./frontend/web/public/index.html")
+		server.StaticFile("/register", "./frontend/web/public/index.html")
 
 		server.StaticFile("/favicon.ico", "./frontend/web/public/favicon.ico")
 		server.StaticFile("/404.html", "./frontend/web/public/404.html")
+		server.StaticFile("/logo.svg", "./frontend/web/public/logo.svg")
 		server.StaticFile("/placeholder.svg", "./frontend/web/public/placeholder.svg")
+		server.StaticFile("/login-bg.svg", "./frontend/web/public/login-bg.svg")
+
 	}
 	return nil
 }
